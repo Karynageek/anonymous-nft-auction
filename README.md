@@ -1,13 +1,5 @@
-# Sample Hardhat Project
+# Smart Contract with Encrypted Bidding on Cypher Testnet
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a Hardhat Ignition module that deploys that contract.
+ This repository contains the code for a smart contract deployed on the Cypher Testnet, designed to facilitate encrypted bidding using Fully Homomorphic Encryption (FHE). The auction allows users to place bids on NFTs while maintaining the confidentiality of their bids.
 
-Try running some of the following tasks:
-
-```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat ignition deploy ./ignition/modules/Lock.ts
-```
+With encryption, all bids are processed without revealing the bid amounts to other participants, providing enhanced privacy and security in decentralized auctions.
