@@ -22,6 +22,8 @@ const config: HardhatUserConfig = {
     cypher: {
       url: process.env.CYPHER_RPC || defaultRpc,
       accounts: { mnemonic: process.env.MNEMONIC || defaultMnemonic },
+      chainId: 9000,
+      timeout: 200000,  // Increase the timeout to 200 seconds (default is 20 seconds)
     },
   },
   gasReporter: {

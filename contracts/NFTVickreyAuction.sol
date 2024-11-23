@@ -18,15 +18,6 @@ contract NFTVickreyAuction is IERC721Receiver {
     error NotAuctionWinner();
     error NoBidsToWithdraw();
 
-    mapping(address => mapping(uint256 => Auction)) public auctionInfo;
-    mapping(address => mapping(EncryptedERC20 => euint64)) public userBids; // Encrypted user bids
-
-    enum Status {
-        NOT_ACTIVE,
-        ACTIVE,
-        FINISHED
-    }
-
     struct Auction {
         address seller;
         address highestBidder;
@@ -38,6 +29,15 @@ contract NFTVickreyAuction is IERC721Receiver {
         uint128 endAt;
         uint8 status;
     }
+
+    enum Status {
+        NOT_ACTIVE,
+        ACTIVE,
+        FINISHED
+    }
+
+    mapping(address => mapping(uint256 => Auction)) public auctionInfo;
+    mapping(address => mapping(EncryptedERC20 => euint64)) public userBids; // Encrypted user bids
 
     event AuctionCreated(
         uint256 indexed nftId,
@@ -192,7 +192,7 @@ contract NFTVickreyAuction is IERC721Receiver {
         }
     }
 
-    function withdrawBid(uint256 nftId, address nftContract) public {
+    function withdrawBid(uint256 nftId, address nftContract) external {
         Auction storage auction = auctionInfo[nftContract][nftId];
         if (auction.status != uint8(Status.FINISHED)) {
             revert AuctionNotEnded();
