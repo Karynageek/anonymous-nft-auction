@@ -7,6 +7,11 @@ import "./lib/TFHE.sol";
 import "./lib/Gateway.sol";
 import "./EncryptedERC20.sol";
 
+/**
+ * @title NFTVickreyAuction
+ * @notice A Vickrey auction contract for NFTs.
+ * The auction is Vickrey-style, meaning that the highest bidder wins the NFT, but pays the second-highest bid amount.
+ */
 contract NFTVickreyAuction is IERC721Receiver {
     error ZeroAddress();
     error StartAtLessThanNow();
@@ -121,6 +126,7 @@ contract NFTVickreyAuction is IERC721Receiver {
 
     /**
      * @notice Places a bid on an active NFT Vickrey auction.
+     * The bid amount is encrypted using TFHE and the proof is provided as input.
      *
      * @param nftId The unique identifier of the NFT being bid on.
      * @param nftContract The address of the contract of the NFT being bid on.
@@ -201,12 +207,12 @@ contract NFTVickreyAuction is IERC721Receiver {
                 auction.seller,
                 auction.secondHighestBid
             );
-            
+
+            // Refund remaining tokens to highest bidder
             euint64 refund = TFHE.sub(
                 userBids[auction.highestBidder][auction.erc20Token],
                 auction.highestBid
             );
-            // Refund remaining tokens to highest bidder
             userBids[auction.highestBidder][auction.erc20Token] = refund;
         } else {
             // Return NFT if no bids placed
