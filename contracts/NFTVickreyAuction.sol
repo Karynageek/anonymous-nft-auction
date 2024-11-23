@@ -79,6 +79,15 @@ contract NFTVickreyAuction is IERC721Receiver {
         return this.onERC721Received.selector;
     }
 
+    /**
+     * @notice Creates a new NFT Vickrey auction.
+     *
+     * @param nftId The unique identifier of the NFT being listed.
+     * @param nftContract The address of the contract of the NFT being listed.
+     * @param erc20Token The ERC20 token to be used for bidding in the auction.
+     * @param startAt The timestamp at which the auction will start.
+     * @param endAt The timestamp at which the auction will end.
+     */
     function listOnAuction(
         uint256 nftId,
         address nftContract,
@@ -110,6 +119,14 @@ contract NFTVickreyAuction is IERC721Receiver {
         emit AuctionCreated(nftId, nftContract, msg.sender, startAt, endAt);
     }
 
+    /**
+     * @notice Places a bid on an active NFT Vickrey auction.
+     *
+     * @param nftId The unique identifier of the NFT being bid on.
+     * @param nftContract The address of the contract of the NFT being bid on.
+     * @param encryptedBid The encrypted bid amount.
+     * @param inputProof The proof for the encrypted bid.
+     */
     function placeBid(
         uint256 nftId,
         address nftContract,
@@ -155,6 +172,14 @@ contract NFTVickreyAuction is IERC721Receiver {
         emit BidPlaced(nftId, nftContract, msg.sender);
     }
 
+    /**
+     * @notice Finalizes an NFT Vickrey auction.
+     * If the auction has ended, the highest bidder wins the NFT and the second-highest bid is paid to the seller.
+     * If no bids were placed, the NFT is returned to the seller.
+     *
+     * @param nftId The unique identifier of the NFT being auctioned.
+     * @param nftContract The address of the contract of the NFT being auctioned.
+     */
     function finalizeAuction(uint256 nftId, address nftContract) external {
         Auction storage auction = auctionInfo[nftContract][nftId];
         if (block.timestamp <= auction.endAt) {
@@ -176,12 +201,8 @@ contract NFTVickreyAuction is IERC721Receiver {
                 auction.seller,
                 auction.secondHighestBid
             );
-
-            euint64 refund = TFHE.sub(
-                auction.highestBid,
-                auction.secondHighestBid
-            );
-            userBids[msg.sender][auction.erc20Token] = refund;
+            // Refund remaining tokens to highest bidder
+            userBids[auction.highestBidder][auction.erc20Token] = refund;
         } else {
             // Return NFT if no bids placed
             IERC721(nftContract).safeTransferFrom(
@@ -192,6 +213,13 @@ contract NFTVickreyAuction is IERC721Receiver {
         }
     }
 
+    /**
+     * @notice Withdraws a bid from an NFT Vickrey auction.
+     * If the auction has ended, the bid amount is returned to the bidder.
+     *
+     * @param nftId The unique identifier of the NFT being auctioned.
+     * @param nftContract The address of the contract of the NFT being auctioned.
+     */
     function withdrawBid(uint256 nftId, address nftContract) external {
         Auction storage auction = auctionInfo[nftContract][nftId];
         if (auction.status != uint8(Status.FINISHED)) {
@@ -214,6 +242,13 @@ contract NFTVickreyAuction is IERC721Receiver {
         emit BidWithdrawn(msg.sender);
     }
 
+    /**
+     * @notice Withdraws an NFT from an NFT Vickrey auction.
+     * If the auction has ended, the NFT is returned to the highest bidder.
+     *
+     * @param nftId The unique identifier of the NFT being auctioned.
+     * @param nftContract The address of the contract of the NFT being auctioned.
+     */
     function withdrawNFT(uint256 nftId, address nftContract) external {
         Auction storage auction = auctionInfo[nftContract][nftId];
         if (auction.highestBidder != msg.sender) {
