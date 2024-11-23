@@ -201,6 +201,11 @@ contract NFTVickreyAuction is IERC721Receiver {
                 auction.seller,
                 auction.secondHighestBid
             );
+            
+            euint64 refund = TFHE.sub(
+                userBids[auction.highestBidder][auction.erc20Token],
+                auction.highestBid
+            );
             // Refund remaining tokens to highest bidder
             userBids[auction.highestBidder][auction.erc20Token] = refund;
         } else {
